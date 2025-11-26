@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Google Docs</title>
+<link href="https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_document_x16.png" rel="icon" type="image/x-icon">
+<style>
+body { margin:0; font-family:"Segoe UI",sans-serif; background:#0d0d1a; color:white; height:100vh; overflow:hidden; }
+.sidebar { width:320px; background:#14142b; padding:20px; display:flex; flex-direction:column; overflow-y:auto; border-right:2px solid #252550; position:absolute; top:0; left:0; bottom:0; transition: transform 0.3s ease; z-index:2; }
+.sidebar.hidden { transform:translateX(-100%); }
+.sidebar h1 { font-size:22px; margin-bottom:10px; text-shadow:0 0 10px #5a5aff; }
+.sidebar h1.panic-note { font-size:12px; }
+input { width:100%; padding:10px; border-radius:8px; border:none; margin-bottom:10px; background:#1f1f3d; color:white; position:sticky; top:50px; z-index:5; }
+.az-filter { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:6px; position:sticky; top:110px; background:#14142b; padding-top:5px; z-index:4; }
+.az-filter button { background:#262650; border:none; padding:4px 7px; border-radius:4px; cursor:pointer; font-size:12px; color:white; }
+.az-filter button:hover { background:#4f4f9e; }
+#favBtn { background:#262650; border:none; border-radius:6px; padding:6px 0; margin:6px 0 10px 0; width:100%; cursor:pointer; font-size:14px; }
+#favBtn:hover { background:#4f4f9e; }
+#gamesContainer { flex:1; overflow-y:auto; scrollbar-width:none; margin-top:5px; }
+#gamesContainer::-webkit-scrollbar { display:none; }
+.game-card { background:#1b1b38; border-radius:12px; margin-bottom:15px; overflow:hidden; box-shadow:0 3px 10px rgba(0,0,0,.3); }
+.game-card img { width:100%; height:160px; object-fit:cover; }
+.game-info { padding:10px; text-align:center; }
+.game-title { font-size:16px; display:flex; justify-content:center; align-items:center; gap:6px; }
+.star { cursor:pointer; font-size:18px; color:gold; }
+.star.off { color:gray; }
+.button-row { display:flex; gap:8px; justify-content:center; }
+.button-row button { background:#5a5aff; border:none; padding:7px 11px; border-radius:6px; color:white; cursor:pointer; font-size:14px; }
+.button-row button:hover { background:#7878ff; }
+.toggle-sidebar { position:absolute; top:50%; transform:translateY(-50%); background:#5a5aff; padding:8px; border-radius:0 8px 8px 0; cursor:pointer; font-size:18px; z-index:3; left:362px; transition:left 0.3s; }
+.toggle-sidebar:hover { background:#7474ff; }
+.content { position:absolute; top:0; bottom:0; left:320px; right:0; transition:left 0.3s; }
+.content.full { left:0; }
+.content iframe { width:100%; height:100%; border:none; }
+</style>
+</head>
+<body>
+
+<div class="sidebar" id="sidebar">
+  <h1>Game Library</h1>
+  <h1 class="panic-note">Use the cache button to play games offline</h1>
+  <input type="text" id="search" placeholder="Search games...">
+  <button id="cacheBtn" style="
+  background:#262650; border:none; border-radius:6px; padding:8px 0; margin-bottom:6px; width:100%; cursor:pointer; font-size:14px;
+">💾 Start Caching</button>
+<div id="cacheStatus" style="font-size:12px; color:#aaa; margin-bottom:10px;">(no cached files)</div>
+  <div class="az-filter" id="azFilter"></div>
+  <button id="favBtn">★ Favorites</button>
+  <div id="gamesContainer">Loading games...</div>
+</div>
+
+<div class="toggle-sidebar" id="toggleBtn">❮</div>
+<div class="content" id="content"><p style="color:#aaa;">Select a game from the sidebar.</p></div>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(reg => {
+      console.log('Service Worker registered.');
+
+      // Tell the SW to start caching once ready
+      navigator.serviceWorker.ready.then(swReg => {
+        swReg.active?.postMessage('start-cache');
+      });
+
+      // Listen for progress messages from SW
+      navigator.serviceWorker.addEventListener('message', evt => {
+        const data = evt.data;
+        if (data.cached !== undefined) {
+          console.log(`Caching progress: ${data.cached}/${data.total}`);
+          // Optional: update UI progress bar
+        }
+      });
+    })
+    .catch(err => console.error('SW registration failed:', err));
+}
+</script>
+<script>
+/*
+  Updated script:
+  - Blocks / auto-closes popups or redirects that begin with hexorod.github.io (unless inside an iframe)
+  - Keeps iframe behavior unchanged
+  - Uses a Firefox/Edge-friendly approach to create a fullscreen about:blank tab with an iframe
+*/
+
+const sidebar = document.getElementById("sidebar");
+const toggleBtn = document.getElementById("toggleBtn");
+const gamesContainerEl = document.getElementById("gamesContainer");
+const contentEl = document.getElementById("content");
+const favBtnEl = document.getElementById("favBtn");
+
+let favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+let showOnlyFav = false;
+
+// ----------------- Sidebar toggle -----------------
+toggleBtn.onclick = () => {
+  sidebar.classList.toggle("hidden");
+  contentEl.classList.toggle("full");
+  toggleBtn.style.left = sidebar.classList.contains("hidden") ? "0" : "362px";
+  toggleBtn.textContent = sidebar.classList.contains("hidden") ? "❯" : "❮";
+};
+
+// ----------------- Utilities -----------------
+function formatName(name){
+  return name.replace(".html","")
+             .replace(/^cl/,"")
+             .replace(/[-_]/g," ")
+             .replace(/([a-z])([A-Z])/g,"$1 $2")
+             .trim()
+             .replace(/^./, c => c.toUpperCase());
+}
+
+// ----------------- Redirect / Popup guard -----------------
+(function(){
+  // Strings to watch for. If a popup/tab navigates to a URL that includes any of these,
+  // it will be closed automatically (unless it's an iframe in a parent document).
+  const killList = ["sussyboi01.github.io", "https://sussyboi01.github.io", "http://sussyboi01.github.io"];
+
+  // Wrap window.open in this page so attempts to open directly to hexorod are blocked.
+  const origOpen = window.open.bind(window);
+  window.open = function(url, target, features){
+    try {
+      if (typeof url === "string" && killList.some(k => url.includes(k))) {
+        console.warn("Blocked popup opening to:", url);
+        return null;
+      }
+    } catch (e) { /* ignore */ }
+    return origOpen(url, target, features);
+  };
+
+  // Periodically check if the current top-level window has been redirected to a killList URL.
+  // If so, close the window/tab. We only attempt to close when window.top === window.self
+  // (i.e. not inside an iframe).
+  setInterval(() => {
+    try {
+      if (window.top === window.self) {
+        const href = location.href || "";
+        if (killList.some(k => href.includes(k))) {
+          // Attempt to close the window/tab (works for popups or same-origin navigations).
+          console.warn("Detected unwanted redirect to:", href, " — closing.");
+          try { window.close(); } catch (e) { /* ignore */ }
+        }
+      }
+    } catch (e) { /* cross-origin issues — ignore */ }
+  }, 400);
+})();
+
+// ----------------- Fetch games -----------------
+async function fetchGames(){
+  try{
+    const res = await fetch("https://api.github.com/repos/sussyboi01/sdgjseiofjsdioejaklsjfkznjvkdrilgqajfpasjfksgperujscklvgbo4hipasjpasl-/git/trees/main?recursive=1");
+    const data = await res.json();
+    const files = (data && data.tree) ? data.tree.filter(f=>f.path.endsWith(".html")) : [];
+    renderGames(files);
+    setupAZ(files);
+  }catch(err){
+    gamesContainerEl.innerHTML="<p style='color:red;'>Failed to load games.</p>";
+    console.error(err);
+  }
+}
+
+// ----------------- Render / Card -----------------
+function renderGames(files, letter=null, search=""){
+  const img="https://pbs.twimg.com/media/Ggj70WPXcAAV1L9.jpg:small";
+  let list = files.filter(f=>{
+    const t=formatName(f.path);
+    if(letter && !t.toLowerCase().startsWith(letter)) return false;
+    if(showOnlyFav && !favorites.includes(f.path)) return false;
+    if(search && !t.toLowerCase().includes(search)) return false;
+    return true;
+  });
+  let html = list.map(f=>card(f,img,favorites.includes(f.path))).join("") || "<p style='padding:12px;color:#999;'>No games found.</p>";
+  gamesContainerEl.innerHTML=html;
+  attach(files);
+}
+
+function card(f,img,isFav){
+  return `<div class="game-card" data-path="${f.path}">
+    <img src="${img}">
+    <div class="game-info">
+      <div class="game-title">${formatName(f.path)}<span class="star ${isFav?"":"off"}" title="Toggle favorite">★</span></div>
+      <div class="button-row">
+        <button class="play-btn">Play</button>
+        <button class="full-btn">Fullscreen</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ----------------- Attach events -----------------
+function attach(files){
+  // Fullscreen button — opens a new about:blank tab and injects an iframe pointing to the game.
+  // This approach is deliberately conservative: it first opens about:blank (less likely to be popup-blocked),
+  // then writes a small HTML that contains a single iframe. Firefox is handled by writing after setting
+  // newTab.location to about:blank and doing a small timeout.
+  document.querySelectorAll(".full-btn").forEach(b=>{
+    b.onclick = e => {
+      const p = e.target.closest(".game-card").dataset.path;
+      const url = "https://hexorod.github.io/adasdgtergscvbfr5etyrawdasdfegertawdA/" + p;
+
+      // Block attempts to open directly to killList from here as well
+      const killPrefixes = ["hexorod.github.io"];
+      if (killPrefixes.some(k => url.includes(k))) {
+        // We still allow opening a sandboxed about:blank that contains only an iframe to that url,
+        // but if you want to entirely block opening games from this host, uncomment the next lines:
+        // alert("Opening of this host is blocked.");
+        // return;
+      }
+
+      const newTab = window.open("about:blank", "_blank");
+      if (newTab) {
+        // Some browsers (Firefox) can be finicky about immediate document.write after open.
+        // We'll prepare a full HTML and write it shortly after ensuring the tab exists.
+       const pageHTML = `
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Google Docs</title>
+  <link rel="icon" href="https://www.gstatic.com/docs/doclist/images/mediatype/icon_1_document_x16.png" type="image/png">
+  <style>
+    html,body { margin:0; height:100%; background:#000; }
+    iframe { width:100%; height:100%; border:0; display:block; }
+  </style>
+</head>
+<body>
+  <iframe
+    src="${url}"
+    allowfullscreen
+    allow="camera; microphone; autoplay; encrypted-media; picture-in-picture; clipboard-write; clipboard-read; display-capture; web-share; gamepad; geolocation; payment; midi; pointer-lock"
+    sandbox="
+      allow-same-origin
+      allow-scripts
+      allow-forms
+      allow-popups
+      allow-modals
+      allow-orientation-lock
+      allow-pointer-lock
+      allow-presentation
+      allow-downloads
+    "
+  ></iframe>
+</body>
+</html>`;
+
+
+        try {
+          // Make sure newTab is at about:blank (helps Firefox). Then write the HTML.
+          newTab.document.open();
+          // Some browsers require location to be about:blank for the write to work consistently:
+          try { newTab.location = "about:blank"; } catch (e) { /* ignore cross-origin */ }
+          // Small timeout gives the new tab a tick to initialize (improves Firefox reliability)
+          setTimeout(() => {
+            try {
+              newTab.document.write(pageHTML);
+              newTab.document.close();
+            } catch (err) {
+              // If writing fails (rare), fallback to setting location to a data URL.
+              try {
+                const blob = new Blob([pageHTML], {type: 'text/html'});
+                const urlObj = URL.createObjectURL(blob);
+                newTab.location.href = urlObj;
+              } catch (e2) {
+                console.error("Failed to write to new tab:", e2);
+              }
+            }
+          }, 30);
+        } catch (ex) {
+          console.error("Error preparing new tab:", ex);
+        }
+      } else {
+        alert("Popup blocked! Please allow popups for this site.");
+      }
+    };
+  });
+
+  
+
+  // Favorite toggle
+  document.querySelectorAll(".star").forEach(s=>{
+    s.onclick = e => {
+      const p = e.target.closest(".game-card").dataset.path;
+      if(favorites.includes(p)){
+        favorites = favorites.filter(x=>x!==p);
+        e.target.classList.add("off");
+      } else {
+        favorites.push(p);
+        e.target.classList.remove("off");
+      }
+      localStorage.setItem("favorites", JSON.stringify(favorites));
+      renderGames(files, null, document.getElementById("search").value.toLowerCase());
+    };
+  });
+
+  // Play button (load in the content area iframe)
+  document.querySelectorAll(".play-btn").forEach(b=>{
+    b.onclick = e => {
+      const p = e.target.closest(".game-card").dataset.path;
+      const url = "https://sussyboi01.github.io/sdgjseiofjsdioejaklsjfkznjvkdrilgqajfpasjfksgperujscklvgbo4hipasjpasl-/" + p;
+      // load into content area iframe (iframe loading is explicitly allowed)
+      contentEl.innerHTML = `<iframe src="${url}" allowfullscreen></iframe>`;
+    };
+  });
+}
+const cacheBtn = document.getElementById('cacheBtn');
+const cacheStatus = document.getElementById('cacheStatus');
+
+async function updateCacheStatus() {
+  if (!('caches' in window)) return;
+
+  const cacheNames = await caches.keys();
+  if (!cacheNames.includes('games-cache-v1')) {
+    cacheStatus.textContent = '(no cached files)';
+    return;
+  }
+
+  const cache = await caches.open('games-cache-v1');
+  const requests = await cache.keys();
+  cacheStatus.textContent = `Cached ${requests.length} files`;
+}
+
+// Initial status
+updateCacheStatus();
+
+// Button click
+cacheBtn.addEventListener('click', async () => {
+  if (!navigator.serviceWorker.controller) {
+    cacheStatus.textContent = 'Service Worker not ready yet. Reopen this.';
+    return;
+  }
+
+  // Tell SW to start caching
+  navigator.serviceWorker.controller.postMessage('start-cache');
+  cacheStatus.textContent = 'Caching started...';
+
+  // Update status in real-time
+  const interval = setInterval(async () => {
+    const cache = await caches.open('games-cache-v1');
+    const requests = await cache.keys();
+    cacheStatus.textContent = requests.length > 0 ? `Cached ${requests.length} files` : '(no cached files)';
+  }, 500);
+
+  // Stop interval when caching finishes (SW can send a "done" message)
+  navigator.serviceWorker.addEventListener('message', evt => {
+    if (evt.data && evt.data.done) {
+      clearInterval(interval);
+      cacheStatus.textContent += ' ✅ Caching complete';
+    }
+  });
+});
+
+
+// ----------------- A-Z and search -----------------
+function setupAZ(files){
+  const letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  document.getElementById("azFilter").innerHTML=`<button>All</button>`+letters.map(l=>`<button>${l}</button>`).join("");
+  document.querySelectorAll(".az-filter button").forEach(b=>{
+    b.onclick = () => {
+      const l = b.textContent.toLowerCase();
+      renderGames(files, l==="all"?null:l, document.getElementById("search").value.toLowerCase());
+    };
+  });
+  document.getElementById("search").oninput = e => {
+    renderGames(files, null, e.target.value.toLowerCase());
+  };
+  favBtnEl.onclick = () => {
+    showOnlyFav = !showOnlyFav;
+    favBtnEl.style.background = showOnlyFav ? "#5a5aff" : "#262650";
+    renderGames(files, null, document.getElementById("search").value.toLowerCase());
+  };
+}
+
+// ----------------- Panic key (CTRL+Q) -----------------
+document.addEventListener("keydown", e=>{
+  if(e.ctrlKey && e.key.toLowerCase()==="q"){
+    const url="https://classroom.google.com";
+    window.open(url,"_blank");
+  }
+});
+
+// ----------------- Initialize -----------------
+fetchGames();
+</script>
+</body>
+</html>
