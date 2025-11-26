@@ -1,4 +1,4 @@
-const CACHE_NAME = 'games-cache-v3';
+const CACHE_NAME = 'games-cache-v1';
 const GAME_BASE_URL = 'https://sussyboi01.github.io/sdgjseiofjsdioejaklsjfkznjvkdrilgqajfpasjfksgperujscklvgbo4hipasjpasl-/';
 
 // Start caching when page sends "start-cache"
