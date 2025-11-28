@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fullscreen Blackjack Embed</title>
+    <style>
+        /* Essential styles to ensure the iframe fills the entire viewport */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden; /* Prevent body scrollbars */
+            box-sizing: border-box;
+        }
+
+        /* Style the iframe to be 100% of its parent (the body) and remove default borders */
+        .fullscreen-iframe {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border: none;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <!--
+        The iframe loads the external content.
+        The 'sandbox' attribute is included as a security best practice,
+        restricting unnecessary permissions for the embedded content.
+    -->
+    <iframe
+        src="https://sussyboi01.github.io/youtubeshorts"
+        class="fullscreen-iframe"
+        title="Blackjack Game Embed"
+        sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-presentation"
+    >
+        Your browser does not support iframes. Please visit the game directly at brandicameron.github.io/blackjack.
+    </iframe>
+</body>
+</html>
