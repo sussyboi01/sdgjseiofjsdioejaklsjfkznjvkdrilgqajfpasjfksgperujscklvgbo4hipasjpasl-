@@ -1,31 +1,369 @@
 [
   [
-    "HEAD",
-    "HEAD"
+    "1",
+    "cl1"
   ],
   [
-    "config",
-    "config"
+    "2048",
+    "cl2048"
   ],
   [
-    "index",
-    "index"
+    "12 Mini Battles",
+    "cl12minibattles"
   ],
   [
-    "main",
-    "main",
-    "main",
-    "main",
-    "main"
+    "1v1.LoL",
+    "cl1v1lol"
   ],
   [
-    "pack-ad1200b2b768603d0cc41fab71b6b47894a5d214",
-    "pack-ad1200b2b768603d0cc41fab71b6b47894a5d214",
-    "pack-ad1200b2b768603d0cc41fab71b6b47894a5d214"
+    "8 Ball Pool",
+    "cl8ballpool"
+  ],
+  [
+    "99 Balls",
+    "cl99balls"
+  ],
+  [
+    "A Small World Cup",
+    "clasmallworldcup"
+  ],
+  [
+    "Abandoned",
+    "clabandoned"
+  ],
+  [
+    "Achievement Unlocked",
+    "clachievementunlocked"
+  ],
+  [
+    "Ages of Conflict",
+    "clagesofconflict"
+  ],
+  [
+    "Alien Hominid",
+    "clalienhominid"
+  ],
+  [
+    "Amaze",
+    "clamaze"
+  ],
+  [
+    "Angry Birds",
+    "clangrybirds"
+  ],
+  [
+    "Aquapark.io",
+    "claquaparkio"
+  ],
+  [
+    "Attack Hole",
+    "clattackhole"
+  ],
+  [
+    "Awesome Tanks 2",
+    "clawesometanks2"
+  ],
+  [
+    "Awesome Tanks",
+    "clawesometanks"
+  ],
+  [
+    "BERGENTRUCK 201x",
+    "clbergentruck201x"
+  ],
+  [
+    "BFDIA 5b",
+    "clbfdia5b"
+  ],
+  [
+    "BLOODMONEY",
+    "clbloodmoney"
+  ],
+  [
+    "Backrooms",
+    "clbackrooms"
+  ],
+  [
+    "Bacon May Die",
+    "clbaconmaydie"
+  ],
+  [
+    "Bad Ice Cream",
+    "clbadicecream"
+  ],
+  [
+    "Bad Time Simulator",
+    "clbadtimesimulator"
+  ],
+  [
+    "Baldis Basics",
+    "clbaldisbasics"
+  ],
+  [
+    "Bank Robbery 2",
+    "clbankrobbery2"
+  ],
+  [
+    "Basket Battle",
+    "clbasketbattle"
+  ],
+  [
+    "Basket Bros",
+    "clbasketbros"
+  ],
+  [
+    "Basket Random",
+    "clbasketrandom"
+  ],
+  [
+    "Basketball Frvr",
+    "clbasketballfrvr"
+  ],
+  [
+    "Basketball Stars",
+    "clbasketballstars"
+  ],
+  [
+    "Bazooka Boy",
+    "clbazookaboy"
+  ],
+  [
+    "Big ICE Tower Tiny Square",
+    "clbigicetowertinysquare"
+  ],
+  [
+    "Big NEON Tower Tiny Square",
+    "clbigneontowertinysquare"
+  ],
+  [
+    "Big Tower Tiny Square 2",
+    "clbigtowertinysquare2"
+  ],
+  [
+    "Big Tower Tiny Square",
+    "clbigtowertinysquare"
+  ],
+  [
+    "BitLife",
+    "clbitlife"
+  ],
+  [
+    "BitPlanes",
+    "clbitplanes"
+  ],
+  [
+    "BlackJack",
+    "clblackjack"
+  ],
+  [
+    "Block Blast",
+    "clblockblast"
+  ],
+  [
+    "Blocky Snakes",
+    "clblockysnakes"
+  ],
+  [
+    "Bloons TD 2",
+    "clbloonsTD2"
+  ],
+  [
+    "Bloons TD 3",
+    "clbloonsTD3"
+  ],
+  [
+    "Bloons TD 4",
+    "clbloonsTD4"
+  ],
+  [
+    "Bloons TD 5",
+    "clbloonsTD5"
+  ],
+  [
+    "Bloxorz",
+    "clbloxorz"
+  ],
+  [
+    "Bob The Robber 2",
+    "clbobtherobber2"
+  ],
+  [
+    "Bottle Jump 3D",
+    "clbottlejump3d"
+  ],
+  [
+    "Bouncemasters",
+    "clbouncemasters"
+  ],
+  [
+    "Bowmasters",
+    "clbowmasters"
+  ],
+  [
+    "Boxing Random",
+    "clboxingrandom"
+  ],
+  [
+    "Bridge Race",
+    "clbridgerace"
+  ],
+  [
+    "Buckshot Roulette",
+    "clbuckshotroulette"
+  ],
+  [
+    "BuildNow.gg",
+    "clbuildnowgg"
+  ],
+  [
+    "Burrito Bison",
+    "clburritobison"
+  ],
+  [
+    "Celeste",
+    "clceleste"
+  ],
+  [
+    "Choppy Orc",
+    "clchoppyorc"
   ],
   [
     "Clash Of Vikings",
     "clashofvikings"
+  ],
+  [
+    "Color Match",
+    "clcolormatch"
+  ],
+  [
+    "Color Water Sort 3D",
+    "clcolorwatersort3d"
+  ],
+  [
+    "Cookie Clicker",
+    "clcookieclicker",
+    "clcookieclicker",
+    "clcookieclicker"
+  ],
+  [
+    "Coreball",
+    "clcoreball"
+  ],
+  [
+    "Count Masters Stickman Games",
+    "clcountmastersstickmangames"
+  ],
+  [
+    "Crossy Road",
+    "clcrossyroad"
+  ],
+  [
+    "Cut the Rope Time Travel",
+    "clcuttheropetimetravel"
+  ],
+  [
+    "Cut the Rope",
+    "clcuttherope"
+  ],
+  [
+    "DEAD PLATE",
+    "cldeadplate"
+  ],
+  [
+    "DOOM",
+    "cldoom"
+  ],
+  [
+    "Deltatraveler",
+    "cldeltatraveler"
+  ],
+  [
+    "Dig Deep",
+    "cldigdeep"
+  ],
+  [
+    "Doge Miner",
+    "cldogeminer"
+  ],
+  [
+    "Doodle Jump",
+    "cldoodlejump"
+  ],
+  [
+    "Doom 2",
+    "cldoom2"
+  ],
+  [
+    "Draw Climber",
+    "cldrawclimber"
+  ],
+  [
+    "Dreadhead Parkour",
+    "cldreadheadparkour"
+  ],
+  [
+    "Drift Boss",
+    "cldriftboss"
+  ],
+  [
+    "Drift Hunters",
+    "cldrifthunters"
+  ],
+  [
+    "Drive Mad",
+    "cldrivemad"
+  ],
+  [
+    "Driven Wild",
+    "cldrivenwild"
+  ],
+  [
+    "Duck Life 2",
+    "clducklife2"
+  ],
+  [
+    "Duck Life 3",
+    "clducklife3"
+  ],
+  [
+    "Duck Life 4",
+    "clducklife4"
+  ],
+  [
+    "Duck Life",
+    "clducklife"
+  ],
+  [
+    "Escape Road",
+    "clescaperoad"
+  ],
+  [
+    "Fallout",
+    "clfallout"
+  ],
+  [
+    "Fancy Pants Adventure 2",
+    "clfancypantsadventure2"
+  ],
+  [
+    "Fancy Pants Adventure",
+    "clfancypantsadventure"
+  ],
+  [
+    "Fears to Fathom Home Alone",
+    "clfearstofathomhomealone"
+  ],
+  [
+    "Final Earth 2",
+    "clfinalearth2"
+  ],
+  [
+    "Fireboy and Watergirl 2",
+    "clfireboyandwatergirl2"
+  ],
+  [
+    "Fireboy and Watergirl 3",
+    "clfireboyandwatergirl3"
   ],
   [
     "Five Nights at Freddy's_ Pizza Simulator",
@@ -36,8 +374,585 @@
     "Five Nights at Freddys Sister Location"
   ],
   [
+    "Football Bros",
+    "clfootballbros"
+  ],
+  [
+    "Friday Night Funkin",
+    "clfridaynightfunkin"
+  ],
+  [
+    "Geometry Dash Lite",
+    "clgeometrydashlite"
+  ],
+  [
+    "Get Yoked",
+    "clgetyoked"
+  ],
+  [
+    "Getaway Shootout",
+    "clgetawayshootout"
+  ],
+  [
+    "Gobble",
+    "clgobble"
+  ],
+  [
+    "Granny 2",
+    "clgranny2"
+  ],
+  [
+    "Granny 3",
+    "clgranny3"
+  ],
+  [
+    "Granny",
+    "clgranny"
+  ],
+  [
+    "Gunspin",
+    "clgun-spin",
+    "clgunspin"
+  ],
+  [
+    "Happy Wheels",
+    "clhappywheels"
+  ],
+  [
+    "Hide N Seek",
+    "clhidenseek"
+  ],
+  [
+    "Highway Racer 2",
+    "clhighwayracer2"
+  ],
+  [
+    "House of Hazards",
+    "clhouseofhazards"
+  ],
+  [
+    "Human Expenditure Program",
+    "clhumanexpenditureprogram"
+  ],
+  [
+    "Ice Dodo",
+    "clicedodo"
+  ],
+  [
+    "Idle Breakout",
+    "clidlebreakout"
+  ],
+  [
+    "Idle Dice",
+    "clidledice"
+  ],
+  [
+    "Jetpack Joyride",
+    "cljetpackjoyride"
+  ],
+  [
+    "Johnny Trigger",
+    "cljohnnytrigger"
+  ],
+  [
+    "Journey Downhill",
+    "cljourneydownhill"
+  ],
+  [
+    "JustFall.lol",
+    "cljustfalllol"
+  ],
+  [
+    "Laceys Flash Games",
+    "cllaceysflashgames"
+  ],
+  [
+    "Learn to Fly 2",
+    "cllearntofly2"
+  ],
+  [
+    "Learn to Fly 3",
+    "cllearntofly3"
+  ],
+  [
+    "Learn to Fly Idle",
+    "cllearntoflyidle"
+  ],
+  [
+    "Learn to Fly",
+    "cllearntofly"
+  ],
+  [
+    "Line Rider",
+    "cllinerider"
+  ],
+  [
+    "Little Runmo",
+    "cllittlerunmo"
+  ],
+  [
+    "Magic Tiles 3",
+    "clmagictiles3"
+  ],
+  [
+    "Melon Playground",
+    "clmelonplayground"
+  ],
+  [
+    "Metal Gear Solid",
+    "clmetalgearsolid"
+  ],
+  [
+    "Minecraft 1.8.8",
+    "clminecraft1-8-8"
+  ],
+  [
+    "Mob Control HTML5",
+    "clmobcontrolhtml5"
+  ],
+  [
+    "Money Rush",
+    "clmoneyrush"
+  ],
+  [
+    "Monkey Mart",
+    "clmonkeymart"
+  ],
+  [
+    "Monster Tracks",
+    "clmonstertracks"
+  ],
+  [
+    "Moto X3M 2",
+    "clmotox3m2"
+  ],
+  [
+    "Moto X3M 3",
+    "clmotox3m3"
+  ],
+  [
+    "Moto X3M Pool Party",
+    "clmotox3mpoolparty"
+  ],
+  [
+    "Moto X3M Winter",
+    "clmotox3mwinter"
+  ],
+  [
+    "Moto X3M",
+    "clmotox3m"
+  ],
+  [
+    "OvO 2",
+    "clovo2"
+  ],
+  [
+    "Papas Cheeseria",
+    "clpapascheeseria"
+  ],
+  [
+    "Papas Cupcakeria",
+    "clpapascupcakeria"
+  ],
+  [
+    "Papas Freezeria",
+    "clpapasfreezeria"
+  ],
+  [
+    "Papas Hot Doggeria",
+    "clpapashotdoggeria"
+  ],
+  [
+    "Papas Pancakeria",
+    "clpapaspancakeria"
+  ],
+  [
+    "Papas Pastaria",
+    "clpapaspastaria"
+  ],
+  [
+    "Papas Scooperia",
+    "clpapasscooperia"
+  ],
+  [
+    "Papas Sushiria",
+    "clpapassushiria"
+  ],
+  [
+    "Papas Taco Mia",
+    "clpapastacomia"
+  ],
+  [
+    "Papas Wingeria",
+    "clpapaswingeria"
+  ],
+  [
+    "Parappa The Rapper",
+    "clparappatherapper"
+  ],
+  [
+    "Pizza Tower",
+    "clpizzatower"
+  ],
+  [
+    "Plants vs Zombies",
+    "clplantsvszombies"
+  ],
+  [
+    "Pokemon Emerald",
+    "clpokemonemerald"
+  ],
+  [
+    "Poly Track",
+    "clpolytrack"
+  ],
+  [
+    "Pou",
+    "clpou"
+  ],
+  [
+    "Raft Wars",
+    "clraftwars"
+  ],
+  [
+    "Ragdoll Archers",
+    "clragdollarchers"
+  ],
+  [
+    "Ragdoll Hit",
+    "clragdollhit"
+  ],
+  [
+    "Recoil",
+    "clrecoil"
+  ],
+  [
+    "Red Ball 2",
+    "clredball2"
+  ],
+  [
+    "Red Ball 3",
+    "clredball3"
+  ],
+  [
+    "Red Ball 4 Vol. 2",
+    "clredball4vol2"
+  ],
+  [
+    "Red Ball 4 Vol. 3",
+    "clredball4vol3"
+  ],
+  [
+    "Red Ball 4",
+    "clredball4"
+  ],
+  [
+    "Red Ball",
+    "clredball"
+  ],
+  [
+    "Retro Bowl College",
+    "clretrobowlcollege"
+  ],
+  [
+    "Retro Bowl",
+    "clretro-bowl",
+    "clretrobowl"
+  ],
+  [
+    "Riddle School 2",
+    "clriddleschool2"
+  ],
+  [
+    "Riddle School 3",
+    "clriddleschool3"
+  ],
+  [
+    "Riddle School",
+    "clriddleschool"
+  ],
+  [
+    "Riddle Transfer 2",
+    "clriddletransfer2",
+    "clriddletransfer2"
+  ],
+  [
+    "Riddle Transfer",
+    "clriddletransfer"
+  ],
+  [
+    "Road of Fury",
+    "clroadoffury"
+  ],
+  [
+    "Rooftop Snipers 2",
+    "clrooftopsnipers2"
+  ],
+  [
+    "Rooftop Snipers",
+    "clrooftopsnipers"
+  ],
+  [
+    "Run 2",
+    "clrun-2",
+    "clrun2"
+  ],
+  [
+    "Run 3",
+    "clrun3"
+  ],
+  [
+    "Sandboxels",
+    "clsandboxels"
+  ],
+  [
+    "Sandtris",
+    "clsandtris"
+  ],
+  [
+    "Scrap Metal 3",
+    "clscrapmetal3"
+  ],
+  [
+    "Slice it All",
+    "clsliceitall"
+  ],
+  [
+    "Slither.io",
+    "clslitherio"
+  ],
+  [
+    "Slope",
+    "clslope"
+  ],
+  [
+    "Slowroads",
+    "clslowroads"
+  ],
+  [
+    "Smash Karts",
+    "clsmashkarts"
+  ],
+  [
+    "Solar Smash",
+    "clsolarsmash"
+  ],
+  [
+    "Sonic CD",
+    "clsoniccd"
+  ],
+  [
+    "Spacebar Clicker",
+    "clspacebarclicker"
+  ],
+  [
+    "Spiral Roll",
+    "clspiralroll"
+  ],
+  [
+    "Sprunki",
+    "clsprunki"
+  ],
+  [
+    "Stacky Dash",
+    "clstackydash"
+  ],
+  [
+    "Steal A Brainrot",
+    "clstealabrainrot"
+  ],
+  [
+    "Stickman Hook",
+    "clstickmanhook"
+  ],
+  [
+    "Stickman and Guns",
+    "clstickmanandguns"
+  ],
+  [
+    "Super Mario 63",
+    "clsupermario63"
+  ],
+  [
+    "Super Mario 64",
+    "clsupermario64"
+  ],
+  [
+    "Super Mario Bros",
+    "clsupermariobros"
+  ],
+  [
+    "Superhot",
+    "clsuperhot"
+  ],
+  [
+    "Supreme Duelist",
+    "clsupremeduelist"
+  ],
+  [
+    "Swordfight",
+    "clswordfight"
+  ],
+  [
+    "Swords and Souls",
+    "clswordsandsouls"
+  ],
+  [
+    "Tag",
+    "cltag-",
+    "cltag"
+  ],
+  [
+    "Tall Man Run",
+    "cltallmanrun"
+  ],
+  [
+    "Tanuki Sunset",
+    "cltanukisunset"
+  ],
+  [
+    "Temple Run 2",
+    "cltemplerun2"
+  ],
+  [
     "That's Not My Neighbor",
     "Thats Not My Neighbor"
+  ],
+  [
+    "The Deadseat",
+    "clthedeadseat"
+  ],
+  [
+    "The Man In The Window",
+    "clthemaninthewindow"
+  ],
+  [
+    "This Is The Only Level 2",
+    "clthisistheonlylevel2"
+  ],
+  [
+    "This Is The Only Level",
+    "clthisistheonlylevel"
+  ],
+  [
+    "Three Goblets",
+    "clthreegoblets"
+  ],
+  [
+    "Time Shooter 2",
+    "cltimeshooter2"
+  ],
+  [
+    "Tiny Fishing",
+    "cltinyfishing"
+  ],
+  [
+    "Tomb Of The Mask",
+    "cltombofthemask"
+  ],
+  [
+    "Toss The Turtle",
+    "cltosstheturtle"
+  ],
+  [
+    "Traffic Rider",
+    "cltrafficrider"
+  ],
+  [
+    "Tube Jumpers",
+    "cltubejumpers"
+  ],
+  [
+    "Tunnel Rush",
+    "cltunnelrush"
+  ],
+  [
+    "Turbo Stars",
+    "clturbostars"
+  ],
+  [
+    "Undertale Yellow",
+    "clundertaleyellow"
+  ],
+  [
+    "Vex 2",
+    "clvex2"
+  ],
+  [
+    "Vex 3 XMAS",
+    "clvex3xmas"
+  ],
+  [
+    "Vex 3",
+    "clvex3"
+  ],
+  [
+    "Vex 4",
+    "clvex4"
+  ],
+  [
+    "Vex 5",
+    "clvex5"
+  ],
+  [
+    "Vex 6",
+    "clvex6"
+  ],
+  [
+    "Vex 7",
+    "clvex7"
+  ],
+  [
+    "Vex 8",
+    "clvex8"
+  ],
+  [
+    "Vex X3M 2",
+    "clvexx3m2"
+  ],
+  [
+    "Vex X3M",
+    "clvexx3m"
+  ],
+  [
+    "Wheely 2",
+    "clwheely2"
+  ],
+  [
+    "Wheely 3",
+    "clwheely3"
+  ],
+  [
+    "Wheely 4",
+    "clwheely4"
+  ],
+  [
+    "Wheely 5",
+    "clwheely5"
+  ],
+  [
+    "Wheely 6",
+    "clwheely6"
+  ],
+  [
+    "Wheely 7",
+    "clwheely7"
+  ],
+  [
+    "Wheely 8",
+    "clwheely8"
+  ],
+  [
+    "Wheely",
+    "clwheely"
+  ],
+  [
+    "Wordle",
+    "clwordle"
+  ],
+  [
+    "Yume Nikki",
+    "clyumenikki"
   ],
   [
     "clFNAF2",
@@ -56,17 +971,16 @@
     "clboxinglive2"
   ],
   [
-    "clcookieclicker",
-    "clcookieclicker",
-    "clcookieclicker"
-  ],
-  [
     "clcurveball",
     "clcurveball"
   ],
   [
-    "clgun-spin",
-    "clgunspin"
+    "clngon",
+    "n-gon"
+  ],
+  [
+    "closu",
+    "osu"
   ],
   [
     "clpapapizzagoody",
@@ -75,22 +989,6 @@
   [
     "clragdoll-io",
     "clragdollio"
-  ],
-  [
-    "clretro-bowl",
-    "clretrobowl"
-  ],
-  [
-    "clriddletransfer2",
-    "clriddletransfer2"
-  ],
-  [
-    "clrun-2",
-    "clrun2"
-  ],
-  [
-    "cltag-",
-    "cltag"
   ],
   [
     "cltanukisunsetuhhhhhhhh",
