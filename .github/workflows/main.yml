@@ -1,4 +1,4 @@
-name: Find Similar Game Names
+name: Find Similar File Names
 
 on:
   push:
@@ -18,35 +18,52 @@ jobs:
         with:
           node-version: 20
 
-      - name: Run script to find similar names
+      - name: Run script to find similar files
         run: |
           node << 'EOF'
           const fs = require("fs");
           const path = require("path");
 
-          const zonesPath = path.join(process.cwd(), "zones.json");
-          if (!fs.existsSync(zonesPath)) {
-            console.error("zones.json not found!");
-            process.exit(1);
+          // Folder to scan (change if needed)
+          const scanDir = process.cwd(); 
+
+          // Get all files (recursive)
+          function getAllFiles(dir) {
+            let results = [];
+            fs.readdirSync(dir, { withFileTypes: true }).forEach(file => {
+              const fullPath = path.join(dir, file.name);
+              if (file.isDirectory()) {
+                results = results.concat(getAllFiles(fullPath));
+              } else {
+                results.push(fullPath);
+              }
+            });
+            return results;
           }
 
-          const zones = JSON.parse(fs.readFileSync(zonesPath, "utf8"));
+          const allFiles = getAllFiles(scanDir);
 
+          // Extract just the filename without extension
+          const fileNames = allFiles.map(f => path.basename(f, path.extname(f)));
+
+          // Normalize: lowercase, remove non-alphanumeric
           function normalize(name) {
             return name.toLowerCase().replace(/[^a-z0-9]/g, "");
           }
 
           const normalizedMap = {};
-          zones.forEach(entry => {
-            const norm = normalize(entry.name);
+          fileNames.forEach(name => {
+            const norm = normalize(name);
             if (!normalizedMap[norm]) {
               normalizedMap[norm] = [];
             }
-            normalizedMap[norm].push(entry.name);
+            normalizedMap[norm].push(name);
           });
 
+          // Only groups with more than 1 similar file
           const similarGroups = Object.values(normalizedMap).filter(group => group.length > 1);
 
+          // Save JSON
           const outputPath = path.join(process.cwd(), "similar-names.json");
           fs.writeFileSync(outputPath, JSON.stringify(similarGroups, null, 2));
 
