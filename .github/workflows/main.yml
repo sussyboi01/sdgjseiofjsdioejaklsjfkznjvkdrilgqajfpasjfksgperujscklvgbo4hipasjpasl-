@@ -8,10 +8,14 @@ on:
 jobs:
   find-similar:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Explicitly allow the action to write to the repo
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history to ensure merge/rebase works smoothly
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -29,7 +33,6 @@ jobs:
           // Recursive file getter
           function getAllFiles(dir) {
             let results = [];
-            // Skip .git to avoid scanning internal git objects
             if (dir.includes('.git')) return results;
 
             try {
@@ -41,9 +44,7 @@ jobs:
                   results.push(fullPath);
                 }
               });
-            } catch (e) {
-              // Ignore access errors
-            }
+            } catch (e) { }
             return results;
           }
 
@@ -52,17 +53,14 @@ jobs:
           // Get filenames without extension
           const fileNames = allFiles.map(f => path.basename(f, path.extname(f)));
 
-          // Normalize: 
-          // 1. Lowercase 
-          // 2. Remove 'cl' from the start (case-insensitive)
-          // 3. Remove non-alphanumeric characters
+          // Normalize: Lowercase, remove 'cl' prefix, remove symbols
           function normalize(name) {
             let n = name.toLowerCase();
             
-            // Remove 'cl' prefix if present (e.g., 'clButton' -> 'button')
+            // Remove 'cl' ONLY if it is at the start
             n = n.replace(/^cl/, ''); 
 
-            // Remove non-alphanumeric (e.g., 'button-primary' -> 'buttonprimary')
+            // Remove non-alphanumeric characters
             return n.replace(/[^a-z0-9]/g, "");
           }
 
@@ -77,13 +75,9 @@ jobs:
             normalizedMap[norm].push(name);
           });
 
-          // Only keep groups where:
-          // 1. There is more than 1 file
-          // 2. The names are not exactly the same (ignoring duplicates if file exists in multiple folders)
+          // Filter groups
           const similarGroups = Object.values(normalizedMap)
             .filter(group => group.length > 1)
-            // Optional: Filter out groups where all original names are identical 
-            // (e.g. folderA/test.js and folderB/test.js) if you only want 'similar' but different names
             .filter(group => {
                const uniqueNames = new Set(group);
                return uniqueNames.size > 1 || group.length > 1; 
@@ -99,6 +93,19 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
+          
           git add similar-names.json
-          git diff --staged --quiet || git commit -m "Update similar-names.json"
-          git push
+          
+          # Check if there are changes before committing
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update similar-names.json"
+            
+            # --- THE FIX ---
+            # Pull the latest changes from the remote repo to avoid 'fetch first' error
+            # --rebase applies your new commit on top of the remote changes
+            git pull --rebase origin main
+            
+            git push origin main
+          fi
