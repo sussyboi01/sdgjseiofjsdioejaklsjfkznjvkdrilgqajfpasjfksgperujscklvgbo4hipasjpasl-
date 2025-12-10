@@ -1,0 +1,62 @@
+name: Find Similar Game Names
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  find-similar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run script to find similar names
+        run: |
+          node << 'EOF'
+          const fs = require("fs");
+          const path = require("path");
+
+          const zonesPath = path.join(process.cwd(), "zones.json");
+          if (!fs.existsSync(zonesPath)) {
+            console.error("zones.json not found!");
+            process.exit(1);
+          }
+
+          const zones = JSON.parse(fs.readFileSync(zonesPath, "utf8"));
+
+          function normalize(name) {
+            return name.toLowerCase().replace(/[^a-z0-9]/g, "");
+          }
+
+          const normalizedMap = {};
+          zones.forEach(entry => {
+            const norm = normalize(entry.name);
+            if (!normalizedMap[norm]) {
+              normalizedMap[norm] = [];
+            }
+            normalizedMap[norm].push(entry.name);
+          });
+
+          const similarGroups = Object.values(normalizedMap).filter(group => group.length > 1);
+
+          const outputPath = path.join(process.cwd(), "similar-names.json");
+          fs.writeFileSync(outputPath, JSON.stringify(similarGroups, null, 2));
+
+          console.log(`Found ${similarGroups.length} groups of similar names.`);
+          EOF
+
+      - name: Commit and push similar-names.json
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add similar-names.json
+          git commit -m "Update similar-names.json" || echo "No changes to commit"
+          git push
