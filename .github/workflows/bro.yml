@@ -1,0 +1,61 @@
+name: Auto-Zip Large Files (>19MB)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+
+permissions:
+  contents: write
+
+jobs:
+  process-large-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Zip Files and Generate JSON
+        id: zipper
+        run: |
+          mkdir -p release_assets
+          
+          # Create a temp file to track names
+          touch processed_list.txt
+
+          # Find files > 19MB (excluding .git)
+          find . -type f -size +19M -not -path '*/.git/*' | while read file; do
+            echo "Processing large file: $file"
+            
+            # Get clean filename
+            filename=$(basename "$file")
+            
+            # 1. Compress the file
+            gzip -9 -c "$file" > "release_assets/$filename.gz"
+            
+            # 2. Add filename to our list
+            echo "$filename.gz" >> processed_list.txt
+          done
+
+          # 3. Convert the list to a JSON array using jq
+          # (jq is pre-installed on GitHub Actions runners)
+          if [ -s processed_list.txt ]; then
+            jq -R '.' processed_list.txt | jq -s '.' > release_assets/manifest.json
+          else
+            echo "[]" > release_assets/manifest.json
+          fi
+          
+          echo "Manifest created:"
+          cat release_assets/manifest.json
+
+      - name: Update 'lazy-cdn' Release
+        # Only run if we actually created the manifest (even if empty, though you can adjust logic)
+        if: hashFiles('release_assets/*') != ''
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: lazy-cdn
+          name: "Lazy CDN Storage"
+          files: release_assets/* # Uploads both .gz files AND the manifest.json
+          token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: false
+          draft: false
+          allow_override: true
