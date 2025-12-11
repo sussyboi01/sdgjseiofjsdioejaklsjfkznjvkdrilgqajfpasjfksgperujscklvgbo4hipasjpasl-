@@ -1,51 +1,53 @@
-name: Gzip, Zip, and Release
+name: Gzip All Files and Release
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
   compress-and-release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Install zip
-        run: sudo apt-get update && sudo apt-get install -y zip gzip
+      - name: Setup zip & gzip utilities
+        run: sudo apt-get update && sudo apt-get install -y gzip zip
 
-      - name: Gzip all files
+      - name: Prepare gzipped files
         run: |
-          mkdir -p gzipped
-          find . -type f -not -path "./.git/*" -not -name "*.zip" -not -name "*.gz" | while read f; do
-            dest="gzipped/$(echo "$f" | sed 's|^\./||').gz"
-            mkdir -p "$(dirname "$dest")"
-            gzip -c "$f" > "$dest"
+          mkdir gzipped
+          # Compress each file in the repo (skip .git and workflow files)
+          find . -type f ! -path "./.git/*" ! -path "./.github/*" | while read f; do
+            base=$(basename "$f")
+            gzip -c "$f" > "gzipped/$base.gz"
           done
+          echo "All files gzipped into the gzipped/ folder"
 
-      - name: Zip all gzipped files
+      - name: Create zip of gzipped files
         run: |
           ZIP_NAME="gzipped_files_$(date +'%Y%m%d_%H%M%S').zip"
           cd gzipped
           zip -r "../$ZIP_NAME" .
           cd ..
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
+          TAG_NAME="gzipped-$(date +'%Y%m%d-%H%M%S')"
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          echo "Created zip $ZIP_NAME with tag $TAG_NAME"
 
       - name: Create GitHub Release
         id: create_release
         uses: ncipollo/release-action@v1
         with:
-          tag: "gzipped-$(date +'%Y%m%d-%H%M%S')"
-          name: "Gzipped Files $(date +'%Y-%m-%d %H:%M:%S')"
+          tag: ${{ env.TAG_NAME }}
+          name: "Gzipped Files ${{ env.TAG_NAME }}"
           draft: false
           prerelease: false
 
       - name: Upload zip to release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.create_release.outputs.tag }}
+          tag: ${{ env.TAG_NAME }}
           files: ${{ env.ZIP_NAME }}
