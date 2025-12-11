@@ -18,7 +18,7 @@ jobs:
 
       - name: Prepare gzipped files
         run: |
-          mkdir gzipped
+          mkdir -p gzipped
           # Compress each file in the repo (skip .git and workflow files)
           find . -type f ! -path "./.git/*" ! -path "./.github/*" | while read f; do
             base=$(basename "$f")
@@ -38,16 +38,17 @@ jobs:
           echo "Created zip $ZIP_NAME with tag $TAG_NAME"
 
       - name: Create GitHub Release
-        id: create_release
+        id: release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ env.TAG_NAME }}
           name: "Gzipped Files ${{ env.TAG_NAME }}"
           draft: false
           prerelease: false
+          skipIfReleaseExists: true
 
       - name: Upload zip to release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ env.TAG_NAME }}
-          files: ${{ env.ZIP_NAME }}
+          artifacts: ${{ env.ZIP_NAME }}
