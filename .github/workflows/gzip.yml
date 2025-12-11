@@ -1,57 +1,58 @@
-name: Gzip All Files and Release
+name: Gzip + Zip + Release All Files
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main", "master" ]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   compress-and-release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup zip & gzip utilities
-        run: sudo apt-get update && sudo apt-get install -y gzip zip
-
-      - name: Prepare gzipped files
+      - name: Gzip Files and Create Manifest
+        id: gzipper
         run: |
-          mkdir -p gzipped
-          find . -type f ! -path "./.git/*" ! -path "./.github/*" | while read f; do
-            base=$(basename "$f")
-            gzip -c "$f" > "gzipped/$base.gz"
+          mkdir -p release_assets/gzipped
+          touch processed_list.txt
+          
+          # Gzip every file (excluding .git and release_assets)
+          find . -type f -not -path '*/.git/*' -not -path './release_assets/*' | while read file; do
+            filename=$(basename "$file")
+            gzip -9 -c "$file" > "release_assets/gzipped/$filename.gz"
+            echo "$filename.gz" >> processed_list.txt
           done
-          echo "All files gzipped into gzipped/ folder"
-
-      - name: Create zip of gzipped files
-        run: |
-          ZIP_NAME="gzipped_files_$(date +'%Y%m%d_%H%M%S').zip"
-          cd gzipped
-          zip -r "../$ZIP_NAME" .
-          cd ..
-          echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
-          TAG_NAME="gzipped-$(date +'%Y%m%d-%H%M%S')"
-          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-
-      - name: Delete existing tag if exists
-        run: |
-          if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
-            git tag -d "$TAG_NAME"
-            git push origin ":refs/tags/$TAG_NAME"
+          
+          # Generate JSON manifest
+          if [ -s processed_list.txt ]; then
+            jq -R '.' processed_list.txt | jq -s '.' > release_assets/manifest.json
+          else
+            echo "[]" > release_assets/manifest.json
           fi
+          
+          # Create a single zip of all gzipped files
+          cd release_assets/gzipped
+          zip -r ../all_gzipped.zip ./*
+          cd ../..
+          
+          echo "Manifest and zip created:"
+          cat release_assets/manifest.json
+          
+          # Generate unique tag for the release
+          UNIQUE_TAG="lazy-cdn-$(date +'%Y%m%d-%H%M%S')-$(head /dev/urandom | tr -dc a-z0-9 | head -c6)"
+          echo "TAG_NAME=$UNIQUE_TAG" >> $GITHUB_ENV
 
-      - name: Create GitHub Release
-        id: release
-        uses: ncipollo/release-action@v1
+      - name: Publish Release
+        uses: softprops/action-gh-release@v1
         with:
-          tag: ${{ env.TAG_NAME }}
-          name: "Gzipped Files ${{ env.TAG_NAME }}"
-          draft: false
+          tag_name: ${{ env.TAG_NAME }}
+          name: "Lazy CDN Storage ${{ env.TAG_NAME }}"
+          files: release_assets/all_gzipped.zip,release_assets/manifest.json
+          token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: false
-
-      - name: Upload zip to release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ env.TAG_NAME }}
-          artifacts: ${{ env.ZIP_NAME }}
+          draft: false
