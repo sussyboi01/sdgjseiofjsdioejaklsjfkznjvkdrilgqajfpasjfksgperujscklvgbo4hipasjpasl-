@@ -1,112 +1,19 @@
-name: Find and Move Similar Files
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-jobs:
-  organize-similar:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Needed for checking file age via Git
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      # --- STEP 1: GENERATE THE JSON LIST ---
-      - name: Generate similar-names.json
-        run: |
-          node << 'EOF'
-          const fs = require("fs");
-          const path = require("path");
-
-          const scanDir = process.cwd(); 
-
-          // 1. Recursive Scan
-          function getAllFiles(dir) {
-            let results = [];
-            // Ignore .git and existing backups
-            if (dir.includes('.git') || dir.includes('_duplicates_backup')) return results;
-            
-            try {
-              fs.readdirSync(dir, { withFileTypes: true }).forEach(file => {
-                const fullPath = path.join(dir, file.name);
-                if (file.isDirectory()) {
-                  results = results.concat(getAllFiles(fullPath));
-                } else {
-                  results.push(fullPath);
-                }
-              });
-            } catch (e) { }
-            return results;
-          }
-
-          const allFiles = getAllFiles(scanDir);
-
-          // 2. Normalize and Group
-          function normalize(name) {
-            let n = name.toLowerCase();
-            n = n.replace(/^cl/, ''); // Strip 'cl' prefix
-            return n.replace(/[^a-z0-9]/g, "");
-          }
-
-          const normalizedMap = {};
-          
-          allFiles.forEach(fullPath => {
-            const fileName = path.basename(fullPath, path.extname(fullPath));
-            const norm = normalize(fileName);
-            
-            if (!norm) return; 
-
-            if (!normalizedMap[norm]) {
-              normalizedMap[norm] = [];
-            }
-            // Store the RELATIVE path to keep JSON clean and usable for git commands
-            normalizedMap[norm].push(path.relative(scanDir, fullPath));
-          });
-
-          // 3. Filter for groups > 1
-          const similarGroups = Object.values(normalizedMap)
-            .filter(group => group.length > 1)
-            .filter(group => {
-               // Ensure files aren't identical (unlikely with relative paths, but good safety)
-               const uniquePaths = new Set(group);
-               return uniquePaths.size > 1; 
-            });
-
-          // 4. Save JSON
-          const outputPath = path.join(process.cwd(), "similar-names.json");
-          fs.writeFileSync(outputPath, JSON.stringify(similarGroups, null, 2));
-          
-          console.log(`JSON Generated. Found ${similarGroups.length} groups.`);
-          EOF
-
-      # --- STEP 2: PROCESS THE JSON (No Scanning) ---
-      - name: Process JSON and Move Files
+      - name: Process JSON and Move Files (Move Only Newer Files)
         run: |
           node << 'EOF'
           const fs = require("fs");
           const path = require("path");
           const { execSync } = require("child_process");
 
-          const jsonPath = path.join(process.cwd(), "similar-names.json");
-          const backupBaseDir = path.join(process.cwd(), "_duplicates_backup");
+          const repoRoot = process.cwd();
+          const jsonPath = path.join(repoRoot, "similar-names.json");
+          const backupBaseDir = path.join(repoRoot, "_duplicates_backup");
 
           if (!fs.existsSync(jsonPath)) {
             console.log("No JSON found. Exiting.");
             process.exit(0);
           }
 
-          // Read the JSON source of truth
           const groups = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
           let movedCount = 0;
 
@@ -114,77 +21,63 @@ jobs:
             fs.mkdirSync(backupBaseDir);
           }
 
-          console.log("Processing groups from JSON...");
+          console.log("Processing groups from JSON...\n");
+
+          function getGitCreatedAt(relPath) {
+            try {
+              const cmd = `git log --diff-filter=A --follow --format=%aI -- "${relPath}" | tail -1`;
+              const out = execSync(cmd).toString().trim();
+              return out ? new Date(out) : null;
+            } catch {
+              return null;
+            }
+          }
 
           groups.forEach(group => {
-            // 'group' is an array of relative file paths [ "src/Button.js", "src/clButton.js" ]
-            
-            const filesWithAge = group.map(relPath => {
-              const fullPath = path.resolve(process.cwd(), relPath);
-              
-              // Verify file still exists (it should, but safety first)
-              if (!fs.existsSync(fullPath)) {
-                return null;
-              }
+            const fileData = group.map(relPath => {
+              const absolutePath = path.join(repoRoot, relPath);
+              if (!fs.existsSync(absolutePath)) return null;
 
-              try {
-                // Check Git Age
-                const cmd = `git log --diff-filter=A --follow --format=%aI -- "${relPath}" | tail -1`;
-                const dateStr = execSync(cmd).toString().trim();
-                
-                return {
-                  path: fullPath,
-                  relPath: relPath,
-                  date: dateStr ? new Date(dateStr) : new Date()
-                };
-              } catch (e) {
-                // Fallback if git fails
-                return { path: fullPath, relPath: relPath, date: new Date() };
-              }
-            }).filter(item => item !== null);
+              const createdAt = getGitCreatedAt(relPath);
 
-            if (filesWithAge.length < 2) return; // Skip if files are missing
+              return {
+                rel: relPath,
+                abs: absolutePath,
+                createdAt: createdAt || new Date(0) // fallback: treat missing timestamps as oldest
+              };
+            }).filter(v => v);
 
-            // Sort: Oldest (Index 0) -> Newest
-            filesWithAge.sort((a, b) => a.date - b.date);
+            if (fileData.length < 2) return;
 
-            const keeper = filesWithAge[0];       // Oldest file (Keep)
-            const toMove = filesWithAge.slice(1); // Newer files (Move)
+            // Sort by creation time (oldest first)
+            fileData.sort((a, b) => a.createdAt - b.createdAt);
 
-            toMove.forEach(item => {
-              const destPath = path.join(backupBaseDir, item.relPath);
+            const oldest = fileData[0]; // KEEP
+            const newerOnes = fileData.slice(1); // MOVE
+
+            console.log(`Group found: ${group.join(", ")}`);
+            console.log(`Keeping OLDEST: ${oldest.rel} (${oldest.createdAt})`);
+
+            newerOnes.forEach(file => {
+              const destPath = path.join(backupBaseDir, file.rel);
               const destDir = path.dirname(destPath);
 
-              if (!fs.existsSync(destDir)) {
-                fs.mkdirSync(destDir, { recursive: true });
-              }
+              if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
 
               try {
-                fs.renameSync(item.path, destPath);
-                console.log(`MOVED: ${item.relPath}`);
-                console.log(`   -> REASON: Newer than ${keeper.relPath}`);
+                console.log(`  MOVING newer file: ${file.rel}`);
+                console.log(`    Created at: ${file.createdAt}`);
+                console.log(`    Reason: Newer than ${oldest.rel}`);
+
+                fs.renameSync(file.abs, destPath);
                 movedCount++;
-              } catch (e) {
-                console.error(`Error moving ${item.relPath}:`, e.message);
+              } catch (err) {
+                console.error(`ERROR moving ${file.rel}: ${err.message}`);
               }
             });
+
+            console.log("");
           });
 
-          console.log(`\nOperation complete. Moved ${movedCount} files.`);
+          console.log(`\nDone — moved ${movedCount} newer duplicate files.`);
           EOF
-
-      - name: Commit and push changes
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          
-          # Add changes (JSON + Moves)
-          git add .
-          
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "Move newer similar files to backup"
-            git pull --rebase origin main
-            git push origin main
-          fi
