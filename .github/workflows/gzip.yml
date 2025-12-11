@@ -1,0 +1,52 @@
+name: Gzip, Zip, and Release
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  compress-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      releases: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install zip
+        run: sudo apt-get update && sudo apt-get install -y zip gzip
+
+      - name: Gzip all files
+        run: |
+          mkdir -p gzipped
+          find . -type f -not -path "./.git/*" -not -name "*.zip" -not -name "*.gz" | while read f; do
+            dest="gzipped/$(echo "$f" | sed 's|^\./||').gz"
+            mkdir -p "$(dirname "$dest")"
+            gzip -c "$f" > "$dest"
+          done
+
+      - name: Zip all gzipped files
+        run: |
+          ZIP_NAME="gzipped_files_$(date +'%Y%m%d_%H%M%S').zip"
+          cd gzipped
+          zip -r "../$ZIP_NAME" .
+          cd ..
+          echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: "gzipped-$(date +'%Y%m%d-%H%M%S')"
+          name: "Gzipped Files $(date +'%Y-%m-%d %H:%M:%S')"
+          draft: false
+          prerelease: false
+
+      - name: Upload zip to release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.create_release.outputs.tag }}
+          files: ${{ env.ZIP_NAME }}
